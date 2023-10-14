@@ -34,6 +34,7 @@ public class MemberRepository {
     }
 
 
+    public void update(Long id, String name) {
 
-
+    }
 }

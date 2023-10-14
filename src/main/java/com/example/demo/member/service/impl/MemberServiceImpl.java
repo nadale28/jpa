@@ -32,7 +32,7 @@ public class MemberServiceImpl implements MemberService {
 
     //회원 전체 조회
     @Override
-    public List<?> findAll() {
+    public List<Member> findAll() {
         return memberRepository.findAll();
     }
 
@@ -42,6 +42,12 @@ public class MemberServiceImpl implements MemberService {
         validateDuplicateMember(member); // 중복회원 검증
         memberRepository.save(member);
         return member.getId();
+    }
+
+    @Override
+    public void update(Long id, String name) {
+        Member member = memberRepository.find(id);
+        member.setUsername(name);
     }
 
     private void validateDuplicateMember(Member member) {

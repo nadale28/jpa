@@ -8,6 +8,7 @@ public interface MemberService {
     Long save(Member member);
     Member find(Long id);
     List<?> findByUsername(String username);
-    List<?> findAll();
+    List<Member> findAll();
     Long join(Member member);
+    void update(Long id, String name);
 }
