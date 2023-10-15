@@ -1,5 +1,6 @@
 package com.example.demo.item.entity;
 
+import com.example.demo.exception.NotEnoughStockException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,4 +20,11 @@ public abstract class Item {
     private int price;
     private int stockQuantity;
 
+    public void removeStock(int quantity) {
+        int restStock = this.stockQuantity - quantity;
+        if (restStock < 0) {
+            throw new NotEnoughStockException("need more stock");
+        }
+        this.stockQuantity = restStock;
+    }
 }

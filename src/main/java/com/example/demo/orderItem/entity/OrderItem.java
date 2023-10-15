@@ -1,5 +1,6 @@
 package com.example.demo.orderItem.entity;
 
+import com.example.demo.book.entity.Book;
 import com.example.demo.item.entity.Item;
 import com.example.demo.order.entity.Order;
 import jakarta.persistence.*;
@@ -26,4 +27,13 @@ public class OrderItem {
     private int orderPrice; //주문 당시 가격
     private int count;
 
+    public static OrderItem createOrderItem(Item item, int orderPrice, int count) {
+        OrderItem orderItem = new OrderItem();
+        orderItem.setItem(item);
+        orderItem.setOrderPrice(orderPrice);
+        orderItem.setCount(count);
+
+        item.removeStock(count);
+        return orderItem;
+    }
 }
