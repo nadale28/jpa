@@ -6,6 +6,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -19,33 +20,49 @@ public class OrderRepository {
 
     public Order findOne(Long id) {return em.find(Order.class, id);}
 
-    public List<Order> findAll(OrderSearch orderSearch){
+    public List<Order> findAll() {
+        return em.createQuery("select o from Order o", Order.class)
+                .getResultList();
+    }
 
-        // 동적쿼리라면...
+    public List<Order> findAllByString(OrderSearch orderSearch) {
+
         String jpql = "select o from Order o join o.member m";
         boolean isFirstCondition = true;
-        if(orderSearch.getOrderStatus() != null){
-            if(isFirstCondition){
+
+        //주문 상태 검색
+        if (orderSearch.getOrderStatus() != null) {
+            if (isFirstCondition) {
                 jpql += " where";
                 isFirstCondition = false;
-            }else{
+            } else {
                 jpql += " and";
             }
             jpql += " o.status = :status";
         }
 
-        TypedQuery<Order> query = em.createQuery(jpql, Order.class).setMaxResults(1000);
-        if(orderSearch.getOrderStatus() != null){
-            query = query.setParameter("status",orderSearch.getOrderStatus());
+        //회원 이름 검색
+        if (StringUtils.hasText(orderSearch.getMemberName())) {
+            if (isFirstCondition) {
+                jpql += " where";
+                isFirstCondition = false;
+            } else {
+                jpql += " and";
+            }
+            jpql += " m.name like :name";
         }
 
-        return em.createQuery("select o from Order o join o.member m" +
-                " where o.status = :status " +
-                " and m.username like :name ",Order.class)
-                .setParameter("status", orderSearch.getOrderStatus())
-                .setParameter("name", orderSearch.getMemberName())
-                .setMaxResults(1000)
-                .getResultList();
+        TypedQuery<Order> query = em.createQuery(jpql, Order.class)
+                .setMaxResults(1000);
+
+        if (orderSearch.getOrderStatus() != null) {
+            query = query.setParameter("status", orderSearch.getOrderStatus());
+        }
+        if (StringUtils.hasText(orderSearch.getMemberName())) {
+            query = query.setParameter("name", orderSearch.getMemberName());
+        }
+
+        return query.getResultList();
     }
 
     public List<Order> findAllWithMemberDelivery(int offset, int limit) {
@@ -58,4 +75,13 @@ public class OrderRepository {
                 .getResultList();
     }
 
+    public List<Order> findAllWithItem() {
+        return em.createQuery(
+                        "select distinct o from Order o" +
+                                " join fetch o.member m" +
+                                " join fetch o.delivery d" +
+                                " join fetch o.orderItems oi" +
+                                " join fetch oi.item i", Order.class)
+                .getResultList();
+    }
 }
