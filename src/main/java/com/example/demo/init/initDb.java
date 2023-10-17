@@ -6,6 +6,7 @@ import com.example.demo.delivery.entity.Delivery;
 import com.example.demo.member.entity.Member;
 import com.example.demo.order.entity.Order;
 import com.example.demo.orderItem.entity.OrderItem;
+import com.example.demo.team.Team;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +33,13 @@ public class initDb {
         private final EntityManager em;
 
         public void dbInit(){
+            Team team = new Team("teamB");
+            em.persist(team);
+
             Member member = new Member();
             member.setUsername("userA");
             member.setAddress(new Address("서울","1","1111"));
+            member.setTeam(team);
             em.persist(member);
 
             Book book1 = new Book();
@@ -60,9 +65,14 @@ public class initDb {
         }
 
         public void dbInit2(){
+
+            Team team = new Team("teamA");
+            em.persist(team);
+
             Member member = new Member();
             member.setUsername("userB");
             member.setAddress(new Address("진주","2","2222"));
+            member.setTeam(team);
             em.persist(member);
 
             Book book1 = new Book();

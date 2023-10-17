@@ -1,0 +1,10 @@
+
+벌크성 업데이트 조심
+
+영속성 컨텍스트랑 상관없이 하는거라서...
+
+벌크 연산후에는 em.flush(); em.clear(); 를 해주자.
+
+또는
+@Modifying(clearAutomatically = true)
+설정을 해주자.
