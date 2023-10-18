@@ -7,6 +7,7 @@ import com.example.demo.team.QTeam;
 import com.example.demo.team.Team;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -336,6 +337,22 @@ public class QueryDslTest {
                         .when(10).then("열살")
                         .when(20).then("스무살")
                         .otherwise("기타"))
+                .from(member)
+                .fetch();
+    }
+
+    @Test
+    public void constant(){
+        queryFactory
+                .select(member.username, Expressions.constant("A"))
+                .from(member)
+                .fetch();
+    }
+
+    @Test
+    public void concat() {
+        queryFactory
+                .select(member.username.concat("-").concat(member.age.stringValue()))
                 .from(member)
                 .fetch();
     }
