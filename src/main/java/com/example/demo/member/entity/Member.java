@@ -22,7 +22,7 @@ public class Member extends JpaBaseEntity{
     @Id @GeneratedValue
     private Long id;
 
-    @NotNull @NotEmpty
+    /*@NotNull @NotEmpty*/
     private String username;
 
     private int age;

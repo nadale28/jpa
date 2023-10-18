@@ -119,4 +119,23 @@ public class QueryDslTest {
         // 근데 토탈 카운트를 가져오는 쿼리는 따로 요청하여 쓰는게 좋다. 토탈 카운트 쿼리는 성능상 간단해야 하므로
     }
 
+    @Test
+    public void sort() {
+        em.persist(new Member(null, 100));
+        em.persist(new Member("member5", 100));
+        em.persist(new Member("member6", 100));
+
+        List<Member> list = queryFactory
+                .selectFrom(member)
+                .where(member.age.eq(100))
+                .orderBy(member.age.desc(), member.username.asc().nullsLast())
+                .fetch();
+
+        list.stream().forEach(m->{
+            System.out.println("m.getUsername() = " + m.getUsername());
+        });
+    }
+
+
+
 }
