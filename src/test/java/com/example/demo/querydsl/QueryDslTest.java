@@ -221,4 +221,79 @@ public class QueryDslTest {
         System.out.println("teamA = " + teamA.get(member.age.avg()));
         System.out.println("teamB = " + teamB.get(member.age.avg()));
     }
+
+    /**
+     * 일반 조인
+     * inner join
+     */
+    @Test
+    public void join() {
+        queryFactory
+                .selectFrom(member)
+                .join(member.team, team)
+                .where(team.teamName.eq("teamA"))
+                .fetch();
+    }
+
+    @Test
+    public void leftJoin() {
+        queryFactory
+                .selectFrom(member)
+                .leftJoin(member.team, team)
+                .where(team.teamName.eq("teamA"))
+                .fetch();
+    }
+
+    /**
+     * 세타 조인
+     * 연관관계가 없는데 join
+     * 단, left outer join 같은게 안된다.
+     * 쓸모가 없네
+     */
+    @Test
+    public void theta_join() {
+        queryFactory
+                .select(member)
+                .from(member, team)
+                .where(member.username.eq(team.teamName));
+    }
+
+    @Test
+    public void join_on_filtering(){
+        List<Member> fetch = queryFactory
+                .selectFrom(member)
+                .leftJoin(member.team, team)
+                .on(team.teamName.eq("teamA"))
+                .where(team.teamName.eq("teamA"))
+                .fetch();
+        System.out.println("fetch = " + fetch);
+    }
+
+    @Test
+    public void join_on_no_relation(){
+
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        List<Tuple> fetch = queryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(team)
+                .on(member.username.eq(team.teamName))
+                .fetch();
+        Tuple t = fetch.get(0);
+        System.out.println("t = " + t.get(0, Member.class).getTeam().getTeamName());
+        System.out.println("t = " + fetch.get(7).get(1, Team.class).getTeamName());
+
+
+    }
+
+    @Test
+    public void fetchJoin() {
+        queryFactory
+                .selectFrom(member)
+                .join(member.team, team).fetchJoin()
+                .where(team.teamName.eq("teamA"))
+                .fetch();
+    }
+
 }
