@@ -33,8 +33,8 @@ public interface MemberDataRepository extends JpaRepository<Member, Long>, Membe
     @QueryHints(value=@QueryHint(name="org.hibernate.readOnly", value = "true"))
     Member findReadOnlyByUsername(String username);
 
-    List<UsernameOnly> findProjectionsByUsername();
+    List<UsernameOnly> findProjectionsByUsername(String username);
 
-    @Query(value = "select * from member where useranme = ?", nativeQuery = true)
+    @Query(value = "select * from member where username = ?", nativeQuery = true)
     Member findByNativeQuery(String username);
 }

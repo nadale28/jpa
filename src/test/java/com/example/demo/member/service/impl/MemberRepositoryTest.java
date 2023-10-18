@@ -138,7 +138,7 @@ class MemberRepositoryTest {
 
     @Test
     public void projection(){
-        List<UsernameOnly> list = memberDataRepository.findProjectionsByUsername();
+        List<UsernameOnly> list = memberDataRepository.findProjectionsByUsername("member1");
         for (UsernameOnly usernameOnly : list) {
             System.out.println("usernameOnly = " + usernameOnly);
         }
