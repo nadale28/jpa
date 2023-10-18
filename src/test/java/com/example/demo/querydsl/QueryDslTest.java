@@ -3,8 +3,10 @@ package com.example.demo.querydsl;
 
 import com.example.demo.member.entity.Member;
 import com.example.demo.member.entity.QMember;
+import com.example.demo.team.QTeam;
 import com.example.demo.team.Team;
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static com.example.demo.member.entity.QMember.*;
+import static com.example.demo.team.QTeam.*;
 
 
 @SpringBootTest
@@ -184,4 +187,38 @@ public class QueryDslTest {
         System.out.println("page.hasNext() = " + page.hasNext());
     }
 
+    @Test
+    public void aggregation() {
+        List<Tuple> tuples = queryFactory
+                .select(
+                        member.count(),
+                        member.age.sum(),
+                        member.age.avg(),
+                        member.age.max(),
+                        member.age.min()
+                )
+                .from(member)
+                .fetch();
+        Tuple tuple = tuples.get(0);
+        tuple.get(member.count());
+        tuple.get(member.age.sum());
+
+        System.out.println("tuple.toString() = " + tuple.toString());
+    }
+
+    @Test
+    public void group() {
+        List<Tuple> result = queryFactory
+                .select(team.teamName, member.age.avg())
+                .from(member)
+                .join(member.team, team)
+                .groupBy(team.teamName)
+                .fetch();
+
+        Tuple teamA = result.get(0);
+        Tuple teamB = result.get(1);
+
+        System.out.println("teamA = " + teamA.get(member.age.avg()));
+        System.out.println("teamB = " + teamB.get(member.age.avg()));
+    }
 }
