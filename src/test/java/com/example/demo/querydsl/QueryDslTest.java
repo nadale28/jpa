@@ -73,4 +73,32 @@ public class QueryDslTest {
         Assertions.assertThat(findMember.getUsername()).isEqualTo("member1");
     }
 
+    /**
+     * 제공 검색옵션
+     * eq =
+     * ne !=
+     * isNotNull
+     * in
+     * notIn
+     * between
+     * goe >=
+     * gt >
+     * loe <=
+     * lt <
+     * like
+     * contains '%test%'
+     * startsWith 'test%'
+     */
+    @Test
+    public void search(){
+        Member findMember = queryFactory
+                .select(member)
+                .where(
+                        member.username.eq("member1")
+                        .and(member.age.eq(10))
+                )
+                .fetchOne();
+
+    }
+
 }
