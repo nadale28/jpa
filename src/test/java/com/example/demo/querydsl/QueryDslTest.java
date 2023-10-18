@@ -7,6 +7,7 @@ import com.example.demo.team.QTeam;
 import com.example.demo.team.Team;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -26,6 +27,7 @@ import java.util.List;
 
 import static com.example.demo.member.entity.QMember.*;
 import static com.example.demo.team.QTeam.*;
+import static com.querydsl.jpa.JPAExpressions.*;
 
 
 @SpringBootTest
@@ -295,5 +297,37 @@ public class QueryDslTest {
                 .where(team.teamName.eq("teamA"))
                 .fetch();
     }
+
+    @Test
+    public void subQuery(){
+
+        QMember memberSub = new QMember("memberSub");
+
+        queryFactory
+                .selectFrom(member)
+                .where(member.age.eq(
+                        select(memberSub.age.max())
+                                .from(memberSub)
+                ))
+                .fetch();
+    }
+
+    /**
+     * 서브쿼리 한계
+     * from절의 서브쿼리는 불가능하다... jpql도 마찬가지
+     */
+    @Test
+    public void selectSubQuery(){
+        QMember memberSub = new QMember("memberSub");
+
+        queryFactory
+                .select(member.username,
+                        select(memberSub.age.avg())
+                                .from(memberSub))
+                .from(member)
+                .fetch();
+    }
+
+
 
 }
