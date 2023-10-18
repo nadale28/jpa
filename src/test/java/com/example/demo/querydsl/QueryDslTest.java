@@ -4,6 +4,8 @@ package com.example.demo.querydsl;
 import com.example.demo.member.entity.Member;
 import com.example.demo.member.entity.QMember;
 import com.example.demo.team.Team;
+import com.querydsl.core.QueryResults;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -12,6 +14,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -136,6 +142,46 @@ public class QueryDslTest {
         });
     }
 
+    @Test
+    public void paging1() {
+        List<Member> list = queryFactory
+                .select(member)
+                .from(member)
+                .orderBy(member.username.desc())
+                .offset(1)
+                .limit(2)
+                .fetch();
+        list.stream().forEach(m->{
+            System.out.println("m.getUsername() = " + m.getUsername());
+        });
+    }
 
+    @Test
+    public void paging2() {
+        List<Member> list = queryFactory
+                .select(member)
+                .from(member)
+                .orderBy(member.username.desc())
+                .offset(1)
+                .limit(2)
+                .fetch();
+
+        JPAQuery<Long> count = queryFactory
+                .select(member.count())
+                .from(member);
+
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.Direction.DESC, "username");
+
+        Page<Member> page = PageableExecutionUtils.getPage(list, pageRequest, count::fetchOne);
+
+        List<Member> content = page.getContent();
+
+        System.out.println("총 카운트 = " + page.getTotalElements());
+        System.out.println("현재 페이지 = " + page.getNumber());
+        System.out.println("총페이지 " + page.getTotalPages());
+        System.out.println("page.isFirst() = " + page.isFirst());
+        System.out.println("page.isLast() = " + page.isLast());
+        System.out.println("page.hasNext() = " + page.hasNext());
+    }
 
 }
