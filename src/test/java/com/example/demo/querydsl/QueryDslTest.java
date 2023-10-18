@@ -329,5 +329,15 @@ public class QueryDslTest {
     }
 
 
+    @Test
+    public void basicCase(){
+        queryFactory
+                .select(member.age
+                        .when(10).then("열살")
+                        .when(20).then("스무살")
+                        .otherwise("기타"))
+                .from(member)
+                .fetch();
+    }
 
 }
