@@ -3,6 +3,7 @@ package com.example.demo.member.service.impl;
 
 import com.example.demo.member.entity.Member;
 import com.example.demo.member.entity.MemberDto;
+import com.example.demo.member.service.UsernameOnly;
 import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface MemberDataRepository extends JpaRepository<Member, Long> {
+public interface MemberDataRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
     @Query("select m from Member m where m.username = :username")
     List<Member> findUser(@Param("username") String username);
@@ -31,4 +32,9 @@ public interface MemberDataRepository extends JpaRepository<Member, Long> {
 
     @QueryHints(value=@QueryHint(name="org.hibernate.readOnly", value = "true"))
     Member findReadOnlyByUsername(String username);
+
+    List<UsernameOnly> findProjectionsByUsername();
+
+    @Query(value = "select * from member where useranme = ?", nativeQuery = true)
+    Member findByNativeQuery(String username);
 }

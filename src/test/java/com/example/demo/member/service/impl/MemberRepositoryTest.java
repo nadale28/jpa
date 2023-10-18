@@ -3,6 +3,7 @@ package com.example.demo.member.service.impl;
 import com.example.demo.member.entity.Member;
 import com.example.demo.member.entity.MemberDto;
 import com.example.demo.member.service.MemberService;
+import com.example.demo.member.service.UsernameOnly;
 import com.example.demo.team.Team;
 import com.example.demo.team.TeamRepository;
 import jakarta.persistence.EntityManager;
@@ -133,5 +134,15 @@ class MemberRepositoryTest {
         // 이러면 @QueryHints(value=@QueryHint(name="org.hibernate.readOnly", value = "true"))
         // 힌트를 주는거다.
     }
+
+
+    @Test
+    public void projection(){
+        List<UsernameOnly> list = memberDataRepository.findProjectionsByUsername();
+        for (UsernameOnly usernameOnly : list) {
+            System.out.println("usernameOnly = " + usernameOnly);
+        }
+    }
+
 
 }

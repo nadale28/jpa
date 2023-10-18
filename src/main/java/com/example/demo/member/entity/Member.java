@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-public class Member {
+public class Member extends JpaBaseEntity{
 
     @Id @GeneratedValue
     private Long id;
