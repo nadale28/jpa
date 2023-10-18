@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static com.example.demo.member.entity.QMember.*;
 
 
@@ -98,7 +100,23 @@ public class QueryDslTest {
                         .and(member.age.eq(10))
                 )
                 .fetchOne();
+    }
 
+    @Test
+    public void resultFetch() {
+
+        List<Member> fetch = queryFactory
+                .selectFrom(member)
+                .fetch();
+
+        Member fetchOne = queryFactory
+                .selectFrom(member)
+                .fetchOne();
+
+        queryFactory.selectFrom(member).fetchFirst();
+
+        // fetchResult : 페이징 쿼리포함
+        // 근데 토탈 카운트를 가져오는 쿼리는 따로 요청하여 쓰는게 좋다. 토탈 카운트 쿼리는 성능상 간단해야 하므로
     }
 
 }
