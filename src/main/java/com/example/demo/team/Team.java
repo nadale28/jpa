@@ -1,10 +1,11 @@
 package com.example.demo.team;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.example.demo.member.entity.Member;
+import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -22,4 +23,8 @@ public class Team {
     public Team() {
 
     }
+
+    @OneToMany(mappedBy = "team")
+    public List<Member> members = new ArrayList<>();
+
 }

@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@ToString(of = {"id", "username", "age"})
 public class Member extends JpaBaseEntity{
 
     @Id @GeneratedValue
@@ -32,6 +34,7 @@ public class Member extends JpaBaseEntity{
     private List<Order> orders = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id")
     private Team team;
 
     public Member(String username, int age, Team team) {
@@ -48,11 +51,12 @@ public class Member extends JpaBaseEntity{
         this.age = age;
     }
 
-    @Override
-    public String toString() {
-        return "Member{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                '}';
+    public Member(String username) {
+        this.username = username;
+    }
+
+    public void changeTeam(Team team) {
+        this.team = team;
+        team.getMembers().add(this);
     }
 }
