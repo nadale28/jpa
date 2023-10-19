@@ -491,4 +491,28 @@ public class QueryDslTest {
     private Predicate allEq(String usernameParam, Integer ageParam){
         return usernameEq(usernameParam).and(ageEq(ageParam));
     }
+
+
+    @Test
+    public void bulkUpdate(){
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+
+        em.flush();
+        em.clear();
+
+        //영속성 컨텍스트는 그대로 유지된다.
+        //위의 벌크 update 결과가 적용되지 않음
+        List<Member> fetch = queryFactory
+                .selectFrom(member)
+                .fetch();
+
+        for (Member fetch1 : fetch) {
+            System.out.println("fetch1 = " + fetch1);
+        }
+    }
+
 }
