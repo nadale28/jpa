@@ -2,11 +2,14 @@ package com.example.demo.querydsl;
 
 
 import com.example.demo.member.entity.Member;
+import com.example.demo.member.entity.MemberDto;
 import com.example.demo.member.entity.QMember;
 import com.example.demo.team.QTeam;
 import com.example.demo.team.Team;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -41,7 +44,7 @@ public class QueryDslTest {
     JPAQueryFactory queryFactory;
 
     @BeforeEach
-    public void before(){
+    public void before() {
         queryFactory = new JPAQueryFactory(em);
         Team teamA = new Team("teamA");
         Team teamB = new Team("teamB");
@@ -69,14 +72,14 @@ public class QueryDslTest {
                 "where m.username = :username";
 
         Member findMember = em.createQuery(sql, Member.class)
-                .setParameter("username","member1")
+                .setParameter("username", "member1")
                 .getSingleResult();
 
         Assertions.assertThat(findMember.getUsername()).isEqualTo("member1");
     }
 
     @Test
-    public void startQuerydsl(){
+    public void startQuerydsl() {
         //JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         //QMember m = new QMember("m");
         Member findMember = queryFactory
@@ -104,12 +107,12 @@ public class QueryDslTest {
      * startsWith 'test%'
      */
     @Test
-    public void search(){
+    public void search() {
         Member findMember = queryFactory
                 .select(member)
                 .where(
                         member.username.eq("member1")
-                        .and(member.age.eq(10))
+                                .and(member.age.eq(10))
                 )
                 .fetchOne();
     }
@@ -143,7 +146,7 @@ public class QueryDslTest {
                 .orderBy(member.age.desc(), member.username.asc().nullsLast())
                 .fetch();
 
-        list.stream().forEach(m->{
+        list.stream().forEach(m -> {
             System.out.println("m.getUsername() = " + m.getUsername());
         });
     }
@@ -157,7 +160,7 @@ public class QueryDslTest {
                 .offset(1)
                 .limit(2)
                 .fetch();
-        list.stream().forEach(m->{
+        list.stream().forEach(m -> {
             System.out.println("m.getUsername() = " + m.getUsername());
         });
     }
@@ -262,7 +265,7 @@ public class QueryDslTest {
     }
 
     @Test
-    public void join_on_filtering(){
+    public void join_on_filtering() {
         List<Member> fetch = queryFactory
                 .selectFrom(member)
                 .leftJoin(member.team, team)
@@ -273,7 +276,7 @@ public class QueryDslTest {
     }
 
     @Test
-    public void join_on_no_relation(){
+    public void join_on_no_relation() {
 
         em.persist(new Member("teamA"));
         em.persist(new Member("teamB"));
@@ -300,7 +303,7 @@ public class QueryDslTest {
     }
 
     @Test
-    public void subQuery(){
+    public void subQuery() {
 
         QMember memberSub = new QMember("memberSub");
 
@@ -318,7 +321,7 @@ public class QueryDslTest {
      * from절의 서브쿼리는 불가능하다... jpql도 마찬가지
      */
     @Test
-    public void selectSubQuery(){
+    public void selectSubQuery() {
         QMember memberSub = new QMember("memberSub");
 
         queryFactory
@@ -331,7 +334,7 @@ public class QueryDslTest {
 
 
     @Test
-    public void basicCase(){
+    public void basicCase() {
         queryFactory
                 .select(member.age
                         .when(10).then("열살")
@@ -342,7 +345,7 @@ public class QueryDslTest {
     }
 
     @Test
-    public void constant(){
+    public void constant() {
         queryFactory
                 .select(member.username, Expressions.constant("A"))
                 .from(member)
@@ -356,5 +359,93 @@ public class QueryDslTest {
                 .from(member)
                 .fetch();
     }
+
+    @Test
+    public void simpleProjection() {
+        List<String> usernameList = queryFactory
+                .select(member.username)
+                .from(member)
+                .fetch();
+    }
+
+    /**
+     * tuple은 queryDsl 이 제공하는 클래스이다.
+     * 나중에 queryDsl을 안쓸수도 있는건데...
+     * repository안에서만 쓰는 걸 추천
+     */
+    @Test
+    public void tupleProjection() {
+        List<Tuple> tupleList = queryFactory
+                .select(member.username, member.age)
+                .from(member)
+                .fetch();
+
+        for (Tuple tuple : tupleList) {
+            String username = tuple.get(member.username);
+            Integer age = tuple.get(member.age);
+        }
+
+    }
+
+
+    /**
+     * getter,setter를 이용하여 매핑
+     */
+    @Test
+    public void findDtoBySetter() {
+        List<MemberDto> result = queryFactory
+                .select(Projections.bean(MemberDto.class,
+                        member.username,
+                        member.age))
+                .from(member)
+                .fetch();
+    }
+
+
+    /**
+     * getter,setter가 없어도 필드에 값이 들어감
+     * 만약 db 컬럼명과 dto 필드명이 다르다면>
+     * member.username.as("name")
+     */
+    @Test
+    public void findDtoByField() {
+
+        QMember memberSub = new QMember("memberSub");
+
+        List<MemberDto> result = queryFactory
+                .select(Projections.fields(MemberDto.class,
+                        member.username,
+                        member.age,
+                        ExpressionUtils.as(JPAExpressions
+                                .select(memberSub.age.max())
+                                        .from(memberSub), "maxAge")
+                        )
+                )
+                .from(member)
+                .fetch();
+    }
+
+
+    /**
+     * Projections.constructor 은 런타임에 오류가 발생
+     * new QmemberDto는 컴파일 오류라서
+     * 아무래도 new QmemberDto 가 좋은가?
+     * 근데 이 방식은 MemberDto가 QueryDSL에 의존적이게 된다는 단점이 있다.
+     */
+    @Test
+    public void findDtoByConstructor() {
+        queryFactory
+                .select(Projections.constructor(MemberDto.class,
+                        member.username,
+                        member.age))
+                .from(member)
+                .fetch();
+        //또는 생성자에 @QueryProjection 설정을 하고
+        // select(new QMemberDto()) 이런식으로 사용할 수 있다.
+    }
+
+
+
+
 
 }
